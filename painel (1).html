@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Faturamento</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* ── tela de senha ── */
+.lock-screen {
+  position: fixed; inset: 0;
+  background: var(--bg);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 999; padding: 1rem;
+}
+.lock-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 2rem 1.75rem;
+  width: 100%; max-width: 340px;
+  text-align: center;
+}
+.lock-icon {
+  font-size: 36px; margin-bottom: 1rem;
+}
+.lock-card h2 {
+  font-family: 'DM Serif Display', serif;
+  font-size: 22px; font-weight: 400;
+  margin-bottom: 6px;
+}
+.lock-card p {
+  font-size: 13px; color: var(--text2);
+  margin-bottom: 1.5rem;
+}
+.lock-input {
+  width: 100%; height: 44px; padding: 0 14px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 15px; font-family: 'DM Sans', sans-serif;
+  color: var(--text); background: #fff; outline: none;
+  text-align: center; letter-spacing: 4px;
+  margin-bottom: 10px;
+}
+.lock-input:focus { border-color: var(--accent); }
+.lock-input.erro { border-color: var(--red); background: var(--red-light); }
+.lock-btn {
+  width: 100%; height: 44px;
+  background: var(--accent); color: #fff;
+  border: none; border-radius: var(--radius-sm);
+  font-size: 15px; font-weight: 500;
+  font-family: 'DM Sans', sans-serif;
+  cursor: pointer; transition: opacity 0.15s;
+}
+.lock-btn:hover { opacity: 0.88; }
+.lock-erro {
+  font-size: 12px; color: var(--red);
+  margin-top: 8px; display: none;
+}
+
+:root {
+  --bg:           #F4F1EC;
+  --bg2:          #EAE6DE;
+  --card:         #FFFFFF;
+  --accent:       #2C5F8A;
+  --accent-light: #E8F0F7;
+  --green:        #1D7A5F;
+  --green-light:  #E4F5F0;
+  --red:          #C0392B;
+  --red-light:    #FBEAEA;
+  --amber:        #B45309;
+  --text:         #1A1A1A;
+  --text2:        #5C5C5C;
+  --text3:        #9A9A9A;
+  --border:       #E2DDD7;
+  --radius:       14px;
+  --radius-sm:    8px;
+}
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  padding: 2rem 1rem 4rem;
+}
+body::before {
+  content: '';
+  position: fixed;
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, #D6E8F520 0%, transparent 70%);
+  top: -150px; right: -150px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.wrap {
+  max-width: 860px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+}
+
+/* ── nav entre sites ── */
+.site-nav {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+.nav-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 16px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 500;
+  font-family: 'DM Sans', sans-serif;
+  text-decoration: none;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text2);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.nav-btn:hover { background: var(--bg2); color: var(--text); }
+.nav-btn.active {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+
+/* ── cabeçalho ── */
+.top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 2rem;
+}
+.top-left h1 {
+  font-family: 'DM Serif Display', serif;
+  font-size: 28px;
+  font-weight: 400;
+  letter-spacing: -0.3px;
+}
+.top-left h1 em { font-style: normal; color: var(--accent); }
+.top-left p { font-size: 13px; color: var(--text2); margin-top: 5px; }
+
+.month-nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 6px 10px;
+}
+.month-nav button {
+  background: none; border: none; cursor: pointer;
+  color: var(--text2); font-size: 18px; line-height: 1;
+  padding: 2px 6px; border-radius: 4px; transition: background 0.15s;
+}
+.month-nav button:hover { background: var(--bg2); }
+.month-nav span {
+  font-size: 14px; font-weight: 500; color: var(--text);
+  min-width: 130px; text-align: center;
+}
+
+/* ── seção título ── */
+.section-label {
+  font-size: 11px; font-weight: 600; color: var(--text3);
+  text-transform: uppercase; letter-spacing: 0.1em;
+  margin-bottom: 10px; margin-top: 1.75rem;
+  display: flex; align-items: center; gap: 8px;
+}
+.section-label::after {
+  content: ''; flex: 1; height: 1px; background: var(--border);
+}
+
+/* ── cards ── */
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+@media (max-width: 560px) { .cards-grid { grid-template-columns: repeat(2, 1fr); } }
+
+.kcard {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem 1.1rem;
+  position: relative;
+  overflow: hidden;
+  animation: fadeUp 0.4s ease both;
+}
+.kcard::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  border-radius: var(--radius) var(--radius) 0 0;
+}
+.kcard.k-total::before   { background: var(--accent); }
+.kcard.k-count::before   { background: var(--green); }
+.kcard.k-ticket::before  { background: var(--amber); }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.kcard:nth-child(1) { animation-delay: 0s; }
+.kcard:nth-child(2) { animation-delay: 0.06s; }
+.kcard:nth-child(3) { animation-delay: 0.12s; }
+
+.kcard-label {
+  font-size: 11px; color: var(--text2);
+  text-transform: uppercase; letter-spacing: 0.06em;
+  margin-bottom: 8px; font-weight: 500;
+}
+.kcard-val {
+  font-size: 22px; font-weight: 600; letter-spacing: -0.5px;
+}
+.kcard.k-total .kcard-val  { color: var(--accent); }
+.kcard.k-count .kcard-val  { color: var(--green); }
+.kcard.k-ticket .kcard-val { color: var(--amber); }
+.kcard-sub { font-size: 12px; color: var(--text3); margin-top: 4px; }
+
+/* ── gráficos ── */
+.charts-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+@media (max-width: 560px) { .charts-row { grid-template-columns: 1fr; } }
+
+.chart-box {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.1rem 1.25rem;
+}
+.chart-box-title {
+  font-size: 12px; font-weight: 600; color: var(--text2);
+  text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 10px;
+}
+.chart-wrap { position: relative; height: 180px; }
+
+/* ── tabela ── */
+.table-box {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.1rem 1.25rem;
+  overflow-x: auto;
+}
+.table-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.table-title {
+  font-size: 11px; font-weight: 600; color: var(--text2);
+  text-transform: uppercase; letter-spacing: 0.08em;
+}
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+thead th {
+  font-size: 11px; font-weight: 600; color: var(--text2);
+  text-transform: uppercase; letter-spacing: 0.06em;
+  padding: 0 8px 10px; text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+thead th.r { text-align: right; }
+tbody tr { border-bottom: 1px solid var(--border); transition: background 0.1s; }
+tbody tr:last-child { border-bottom: none; }
+tbody tr:hover { background: var(--bg); }
+tbody td { padding: 9px 8px; vertical-align: middle; }
+tbody td.r { text-align: right; }
+.no-data {
+  text-align: center; padding: 2.5rem 1rem;
+  color: var(--text3); font-size: 13px;
+}
+
+/* badges */
+.badge {
+  display: inline-block; padding: 2px 9px;
+  border-radius: 99px; font-size: 11px; font-weight: 600;
+}
+.badge-green  { background: var(--green-light); color: var(--green); }
+.badge-blue   { background: var(--accent-light); color: var(--accent); }
+.badge-red    { background: var(--red-light); color: var(--red); }
+
+/* ── botão adicionar ── */
+.btn-add {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--accent); color: #fff;
+  border: none; border-radius: var(--radius-sm);
+  padding: 8px 16px; font-size: 13px; font-weight: 500;
+  font-family: 'DM Sans', sans-serif; cursor: pointer;
+  transition: opacity 0.15s;
+}
+.btn-add:hover { opacity: 0.88; }
+
+/* ── modal ── */
+.modal-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.35); z-index: 100;
+  align-items: center; justify-content: center; padding: 1rem;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: var(--card); border-radius: var(--radius);
+  border: 1px solid var(--border); padding: 1.5rem;
+  width: 100%; max-width: 380px; animation: fadeUp 0.25s ease;
+}
+.modal h3 {
+  font-family: 'DM Serif Display', serif;
+  font-size: 20px; font-weight: 400; margin-bottom: 4px;
+}
+.modal p { font-size: 13px; color: var(--text2); margin-bottom: 1.25rem; }
+.field { margin-bottom: 12px; }
+.field label {
+  display: block; font-size: 11px; font-weight: 600;
+  color: var(--text2); text-transform: uppercase;
+  letter-spacing: 0.05em; margin-bottom: 5px;
+}
+.field input, .field select {
+  width: 100%; height: 42px; padding: 0 12px;
+  border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+  font-size: 14px; font-family: 'DM Sans', sans-serif;
+  color: var(--text); background: #fff; outline: none;
+}
+.field input:focus, .field select:focus { border-color: var(--accent); }
+.modal-btns { display: flex; gap: 8px; margin-top: 1rem; }
+.btn-cancel {
+  flex: 1; height: 40px; background: transparent;
+  border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+  font-size: 14px; font-family: 'DM Sans', sans-serif;
+  color: var(--text2); cursor: pointer;
+}
+.btn-save {
+  flex: 2; height: 40px; background: var(--accent); color: #fff;
+  border: none; border-radius: var(--radius-sm);
+  font-size: 14px; font-weight: 500;
+  font-family: 'DM Sans', sans-serif; cursor: pointer;
+}
+.btn-save:hover { opacity: 0.88; }
+
+footer {
+  text-align: center; margin-top: 3rem;
+  font-size: 11px; color: var(--text3);
+}
+</style>
+</head>
+<body>
+<!-- tela de senha -->
+<div class="lock-screen" id="lock-screen">
+  <div class="lock-card">
+    <div class="lock-icon">🔒</div>
+    <h2>Área restrita</h2>
+    <p>Digite a senha para acessar o painel</p>
+    <input type="password" class="lock-input" id="lock-input" placeholder="••••••" maxlength="20"
+      onkeydown="if(event.key==='Enter') verificarSenha()"/>
+    <button class="lock-btn" onclick="verificarSenha()">Entrar</button>
+    <div class="lock-erro" id="lock-erro">Senha incorreta. Tente novamente.</div>
+  </div>
+</div>
+
+<div class="wrap" id="conteudo" style="display:none">
+
+  <!-- navegação entre sites -->
+  <nav class="site-nav">
+    <a class="nav-btn" href="index.html">📅 Agendamentos</a>
+    <a class="nav-btn active" href="painel.html">📊 Faturamento</a>
+    <a class="nav-btn" href="balanco.html">💰 Balanço mensal</a>
+  </nav>
+
+  <!-- cabeçalho -->
+  <div class="top">
+    <div class="top-left">
+      <h1>Faturamento <em>mensal</em></h1>
+      <p>Receita gerada pelos atendimentos</p>
+    </div>
+    <div class="month-nav">
+      <button id="prev-m">‹</button>
+      <span id="month-label"></span>
+      <button id="next-m">›</button>
+    </div>
+  </div>
+
+  <!-- cards -->
+  <div class="section-label">resumo</div>
+  <div class="cards-grid">
+    <div class="kcard k-total">
+      <div class="kcard-label">Total faturado</div>
+      <div class="kcard-val" id="c-total">R$ 0,00</div>
+      <div class="kcard-sub">atendimentos pagos</div>
+    </div>
+    <div class="kcard k-count">
+      <div class="kcard-label">Atendimentos</div>
+      <div class="kcard-val" id="c-count">0</div>
+      <div class="kcard-sub" id="c-pend">0 pendentes</div>
+    </div>
+    <div class="kcard k-ticket">
+      <div class="kcard-label">Ticket médio</div>
+      <div class="kcard-val" id="c-ticket">R$ 0,00</div>
+      <div class="kcard-sub">por atendimento pago</div>
+    </div>
+  </div>
+
+  <!-- gráficos -->
+  <div class="section-label">gráficos</div>
+  <div class="charts-row">
+    <div class="chart-box">
+      <div class="chart-box-title">Faturamento por semana</div>
+      <div class="chart-wrap"><canvas id="chart-sem"></canvas></div>
+    </div>
+    <div class="chart-box">
+      <div class="chart-box-title">Faturamento acumulado</div>
+      <div class="chart-wrap"><canvas id="chart-acum"></canvas></div>
+    </div>
+  </div>
+
+  <!-- lista de atendimentos -->
+  <div class="section-label">atendimentos</div>
+  <div class="table-box">
+    <div class="table-header">
+      <span class="table-title">Registros do mês</span>
+      <button class="btn-add" onclick="abrirModal()">+ Registrar atendimento</button>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Data</th>
+          <th>Cliente</th>
+          <th>Serviço</th>
+          <th>Horário</th>
+          <th class="r">Valor</th>
+          <th>Status</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+
+  <footer>dados salvos localmente no seu navegador</footer>
+</div>
+
+<!-- modal -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <h3>Registrar atendimento</h3>
+    <p>Adicione um atendimento para contabilizar no faturamento</p>
+    <div class="field">
+      <label>Nome do cliente</label>
+      <input type="text" id="m-nome" placeholder="Ex: Maria Oliveira"/>
+    </div>
+    <div class="field">
+      <label>Serviço realizado</label>
+      <input type="text" id="m-servico" placeholder="Ex: Corte e escova"/>
+    </div>
+    <div class="field">
+      <label>Data do atendimento</label>
+      <input type="date" id="m-data"/>
+    </div>
+    <div class="field">
+      <label>Horário</label>
+      <input type="time" id="m-hora" value="09:00"/>
+    </div>
+    <div class="field">
+      <label>Valor cobrado (R$)</label>
+      <input type="number" id="m-valor" placeholder="0,00" min="0" step="0.01"/>
+    </div>
+    <div class="field">
+      <label>Status do pagamento</label>
+      <select id="m-status">
+        <option value="pago">Pago</option>
+        <option value="pendente">Pendente</option>
+        <option value="cancelado">Cancelado</option>
+      </select>
+    </div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="fecharModal()">Cancelar</button>
+      <button class="btn-save" onclick="salvar()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+</div><!-- /conteudo -->
+
+<script>
+/* ── senha de acesso ──
+   Troque '1234' pela senha que a prestadora vai usar */
+const SENHA = '1234';
+
+function verificarSenha() {
+  const input = document.getElementById('lock-input');
+  const erro  = document.getElementById('lock-erro');
+  if (input.value === SENHA) {
+    document.getElementById('lock-screen').style.display = 'none';
+    document.getElementById('conteudo').style.display = 'block';
+    sessionStorage.setItem('painel_auth', 'ok');
+    render();
+  } else {
+    input.classList.add('erro');
+    erro.style.display = 'block';
+    input.value = '';
+    setTimeout(() => input.classList.remove('erro'), 1000);
+  }
+}
+
+// se já autenticou nessa sessão, mostra direto
+if (sessionStorage.getItem('painel_auth') === 'ok') {
+  document.getElementById('lock-screen').style.display = 'none';
+  document.getElementById('conteudo').style.display = 'block';
+}
+
+const MONTHS = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho',
+                'Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+const STATUS_BADGE = {
+  pago:      '<span class="badge badge-green">Pago</span>',
+  pendente:  '<span class="badge badge-blue">Pendente</span>',
+  cancelado: '<span class="badge badge-red">Cancelado</span>',
+};
+
+let now   = new Date();
+let year  = now.getFullYear();
+let month = now.getMonth();
+let chartSem = null, chartAcum = null;
+
+function fmtBRL(n) {
+  return 'R$ ' + n.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+function pad(n) { return String(n).padStart(2, '0'); }
+function daysInMonth(y, m) { return new Date(y, m + 1, 0).getDate(); }
+
+function load()  { try { return JSON.parse(localStorage.getItem('painel_agendamentos') || '[]'); } catch(e){ return []; } }
+function save(d) { localStorage.setItem('painel_agendamentos', JSON.stringify(d)); }
+
+/* ── modal ── */
+function abrirModal() {
+  const hoje = new Date();
+  document.getElementById('m-data').value =
+    `${hoje.getFullYear()}-${pad(hoje.getMonth()+1)}-${pad(hoje.getDate())}`;
+  document.getElementById('modal').classList.add('open');
+}
+function fecharModal() {
+  document.getElementById('modal').classList.remove('open');
+  ['m-nome','m-servico','m-valor'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('m-hora').value = '09:00';
+  document.getElementById('m-status').value = 'pago';
+}
+function salvar() {
+  const nome    = document.getElementById('m-nome').value.trim();
+  const servico = document.getElementById('m-servico').value.trim();
+  const data    = document.getElementById('m-data').value;
+  const hora    = document.getElementById('m-hora').value;
+  const valor   = parseFloat(document.getElementById('m-valor').value) || 0;
+  const status  = document.getElementById('m-status').value;
+
+  if (!nome || !data || valor <= 0) { alert('Preencha nome, data e valor.'); return; }
+
+  const lista = load();
+  lista.push({ id: Date.now(), nome, servico, data, hora, valor, status });
+  save(lista);
+  fecharModal();
+  render();
+}
+function deletar(id) {
+  if (!confirm('Remover este atendimento?')) return;
+  save(load().filter(a => a.id !== id));
+  render();
+}
+
+/* ── render ── */
+function render() {
+  document.getElementById('month-label').textContent = `${MONTHS[month]} ${year}`;
+
+  const todos = load();
+  const days  = daysInMonth(year, month);
+
+  // filtra mês atual
+  const doMes = todos.filter(a => {
+    const [y2, m2] = a.data.split('-').map(Number);
+    return y2 === year && m2 - 1 === month;
+  });
+
+  const pagos     = doMes.filter(a => a.status === 'pago');
+  const pendentes = doMes.filter(a => a.status === 'pendente');
+  const totalFat  = pagos.reduce((s, a) => s + (a.valor || 0), 0);
+  const ticket    = pagos.length ? totalFat / pagos.length : 0;
+
+  // cards
+  document.getElementById('c-total').textContent = fmtBRL(totalFat);
+  document.getElementById('c-count').textContent = doMes.length;
+  document.getElementById('c-pend').textContent  = `${pendentes.length} pendente${pendentes.length !== 1 ? 's' : ''}`;
+  document.getElementById('c-ticket').textContent = fmtBRL(ticket);
+
+  // dados por dia
+  const porDia = {};
+  doMes.forEach(a => {
+    const d = parseInt(a.data.split('-')[2]);
+    if (!porDia[d]) porDia[d] = 0;
+    if (a.status === 'pago') porDia[d] += a.valor || 0;
+  });
+
+  // faturamento semanal
+  const semanas = [0,0,0,0,0];
+  for (let d = 1; d <= days; d++) {
+    const wk = Math.min(Math.floor((d - 1) / 7), 4);
+    semanas[wk] += porDia[d] || 0;
+  }
+
+  // acumulado dia a dia
+  let acc = 0;
+  const acumLine = [];
+  for (let d = 1; d <= days; d++) {
+    acc += porDia[d] || 0;
+    acumLine.push(parseFloat(acc.toFixed(2)));
+  }
+
+  // gráfico semanal
+  if (chartSem) chartSem.destroy();
+  chartSem = new Chart(document.getElementById('chart-sem'), {
+    type: 'bar',
+    data: {
+      labels: ['Sem 1','Sem 2','Sem 3','Sem 4','Sem 5'],
+      datasets: [{
+        data: semanas.map(v => parseFloat(v.toFixed(2))),
+        backgroundColor: '#2C5F8A99',
+        borderRadius: 5,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { color: '#9A9A9A', font: { size: 11 } }, grid: { color: 'rgba(0,0,0,0.05)' } },
+        y: { ticks: { color: '#9A9A9A', font: { size: 11 }, callback: v => 'R$' + v.toFixed(0) }, grid: { color: 'rgba(0,0,0,0.05)' } }
+      }
+    }
+  });
+
+  // gráfico acumulado
+  if (chartAcum) chartAcum.destroy();
+  chartAcum = new Chart(document.getElementById('chart-acum'), {
+    type: 'line',
+    data: {
+      labels: Array.from({ length: days }, (_, i) => i + 1),
+      datasets: [{
+        data: acumLine,
+        borderColor: '#2C5F8A',
+        backgroundColor: '#2C5F8A18',
+        fill: true, tension: 0.35, pointRadius: 0, borderWidth: 2,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { color: '#9A9A9A', font: { size: 10 }, maxTicksLimit: 8 }, grid: { color: 'rgba(0,0,0,0.05)' } },
+        y: { ticks: { color: '#9A9A9A', font: { size: 10 }, callback: v => 'R$' + v.toFixed(0) }, grid: { color: 'rgba(0,0,0,0.05)' } }
+      }
+    }
+  });
+
+  // tabela
+  const ordenados = doMes.slice().sort((a, b) => a.data.localeCompare(b.data));
+  const tbody = document.getElementById('tbody');
+  if (!ordenados.length) {
+    tbody.innerHTML = `<tr><td colspan="7" class="no-data">nenhum atendimento registrado este mês</td></tr>`;
+  } else {
+    tbody.innerHTML = ordenados.map(a => {
+      const [, m2, d2] = a.data.split('-');
+      return `<tr>
+        <td style="color:var(--text2)">${pad(d2)}/${pad(m2)}</td>
+        <td style="font-weight:500">${a.nome}</td>
+        <td style="color:var(--text2)">${a.servico || '—'}</td>
+        <td style="color:var(--text2)">${a.hora || '—'}</td>
+        <td class="r" style="font-weight:600;color:var(--accent)">${fmtBRL(a.valor || 0)}</td>
+        <td>${STATUS_BADGE[a.status] || ''}</td>
+        <td style="text-align:right">
+          <button onclick="deletar(${a.id})" style="background:none;border:none;cursor:pointer;color:var(--text3);font-size:15px;" title="Remover">✕</button>
+        </td>
+      </tr>`;
+    }).join('');
+  }
+}
+
+function shiftMonth(d) {
+  month += d;
+  if (month > 11) { month = 0; year++; }
+  if (month < 0)  { month = 11; year--; }
+  render();
+}
+
+document.getElementById('prev-m').onclick = () => shiftMonth(-1);
+document.getElementById('next-m').onclick = () => shiftMonth(1);
+document.getElementById('modal').addEventListener('click', function(e) {
+  if (e.target === this) fecharModal();
+});
+
+render();
+</script>
+</body>
+</html>

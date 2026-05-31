@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Balanço Mensal</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --green: #1D9E75; --green-light: #E1F5EEcc; --green-dark: #085041;
+      --red: #D85A30; --red-light: #FAECE7cc; --red-dark: #4A1B0C;
+      --amber: #BA7517; --amber-light: #FAEEDAcc; --amber-dark: #412402;
+      --blue: #378ADD;
+      --bg: #f5f3ee; --bg2: #eceae3; --bg3: #ffffff;
+      --text: #1c1c19; --text2: #6b6a65; --text3: #a8a8a2;
+      --border: rgba(0,0,0,0.10); --border2: rgba(0,0,0,0.18);
+      --radius-md: 8px; --radius-lg: 14px;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #181816; --bg2: #222220; --bg3: #2a2a28;
+        --text: #f0ede6; --text2: #a0a09a; --text3: #5e5e5a;
+        --border: rgba(255,255,255,0.09); --border2: rgba(255,255,255,0.16);
+        --green-light: #04342C88; --red-light: #4A1B0C88; --amber-light: #41240288;
+        --amber-dark: #FAC775;
+      }
+    }
+    body { font-family: 'Georgia', 'Times New Roman', serif; background: var(--bg); color: var(--text); min-height: 100vh; padding: 28px 16px; }
+    .container { max-width: 720px; margin: 0 auto; }
+
+    /* nav entre sites */
+    .site-nav { display: flex; gap: 8px; margin-bottom: 1.75rem; flex-wrap: wrap; }
+    .nav-btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 7px 16px; border-radius: var(--radius-md);
+      font-size: 13px; font-weight: 600; font-family: -apple-system, sans-serif;
+      text-decoration: none; border: 0.5px solid var(--border2);
+      background: var(--bg3); color: var(--text2); cursor: pointer; transition: opacity .15s;
+    }
+    .nav-btn:hover { background: var(--bg2); }
+    .nav-btn.active { background: #1D9E75; color: #fff; border-color: #1D9E75; }
+
+    .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem; flex-wrap: wrap; gap: 12px; }
+    .header h1 { font-size: 22px; font-weight: 700; letter-spacing: -.02em; }
+    .header h1 span { color: var(--green); }
+
+    .month-nav { display: flex; align-items: center; gap: 10px; }
+    .month-nav button { background: var(--bg3); border: 0.5px solid var(--border2); border-radius: var(--radius-md); padding: 6px 14px; cursor: pointer; font-size: 14px; color: var(--text2); font-family: inherit; }
+    .month-nav button:hover { background: var(--bg2); }
+    .month-nav .month-label { font-size: 15px; font-weight: 600; color: var(--text); min-width: 130px; text-align: center; }
+
+    .cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 1.75rem; }
+    @media (max-width: 560px) { .cards { grid-template-columns: repeat(2, 1fr); } }
+    .card { background: var(--bg3); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: .9rem 1rem; }
+    .card .clabel { font-size: 11px; color: var(--text2); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 6px; }
+    .card .cval { font-size: 17px; font-weight: 700; letter-spacing: -.01em; }
+    .card.inc .cval { color: var(--green); }
+    .card.exp .cval { color: var(--red); }
+    .card.fix .cval { color: var(--amber); }
+    .card.bal .cval { color: var(--text); }
+
+    .stitle { font-size: 12px; font-weight: 700; color: var(--text2); text-transform: uppercase; letter-spacing: .08em; margin-bottom: .8rem; }
+
+    .charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 1.75rem; }
+    @media (max-width: 560px) { .charts-row { grid-template-columns: 1fr; } }
+    .chart-box { background: var(--bg3); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 1rem 1.25rem; }
+    .chart-canvas-wrap { position: relative; width: 100%; height: 180px; margin-top: .5rem; }
+
+    .fixed-panel { background: var(--bg3); border: 0.5px solid var(--border); border-left: 3px solid var(--amber); border-radius: var(--radius-lg); padding: 1rem 1.25rem; margin-bottom: 1.75rem; }
+    .fixed-panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: .75rem; }
+    .fixed-panel-header .ftotal { font-size: 15px; font-weight: 700; color: var(--amber); }
+    .fixed-rows { display: flex; flex-direction: column; gap: 6px; }
+    .fixed-row { display: flex; align-items: center; gap: 10px; font-family: -apple-system, sans-serif; }
+    .fixed-row-icon { font-size: 15px; width: 22px; text-align: center; flex-shrink: 0; }
+    .fixed-row-desc { flex: 1; font-size: 13px; color: var(--text); min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .fixed-row-day { font-size: 11px; color: var(--text2); flex-shrink: 0; }
+    .fixed-row-val { font-size: 13px; font-weight: 600; color: var(--amber); flex-shrink: 0; }
+    .no-fixed { font-size: 13px; color: var(--text2); font-family: -apple-system, sans-serif; }
+
+    .cat-section { background: var(--bg3); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 1rem 1.25rem; margin-bottom: 1.75rem; }
+    .cat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 20px; }
+    @media (max-width: 480px) { .cat-grid { grid-column: 1fr; } }
+    .cat-row { display: flex; align-items: center; gap: 8px; padding: 4px 0; }
+    .cat-icon { font-size: 15px; width: 22px; text-align: center; flex-shrink: 0; }
+    .cat-name { font-size: 12px; color: var(--text2); flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-family: -apple-system, sans-serif; }
+    .cat-bar-bg { width: 60px; height: 6px; background: var(--bg2); border-radius: 99px; overflow: hidden; flex-shrink: 0; }
+    .cat-bar-fill { height: 100%; border-radius: 99px; transition: width .4s; background: var(--red); }
+    .cat-val { font-size: 12px; font-weight: 600; color: var(--text); min-width: 72px; text-align: right; flex-shrink: 0; font-family: -apple-system, sans-serif; }
+
+    .daily-wrap { background: var(--bg3); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 1rem 1.25rem; margin-bottom: 1.75rem; overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; font-family: -apple-system, sans-serif; }
+    thead th { font-size: 11px; font-weight: 700; color: var(--text2); text-transform: uppercase; letter-spacing: .06em; padding: 0 8px 10px; text-align: left; border-bottom: 0.5px solid var(--border2); }
+    thead th.num { text-align: right; }
+    tbody tr { border-bottom: 0.5px solid var(--border); }
+    tbody tr:last-child { border-bottom: none; }
+    tbody td { padding: 9px 8px; color: var(--text); vertical-align: middle; }
+    tbody td.num { text-align: right; font-variant-numeric: tabular-nums; }
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 600; }
+    .badge.pos { background: var(--green-light); color: var(--green-dark); }
+    .badge.neg { background: var(--red-light); color: var(--red-dark); }
+    .no-data { text-align: center; padding: 2rem; color: var(--text2); font-size: 14px; }
+
+    footer { text-align: center; margin-top: 2rem; font-size: 11px; color: var(--text3); font-family: -apple-system, sans-serif; }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <nav class="site-nav">
+    <a class="nav-btn" href="index.html">📅 Agendamentos</a>
+    <a class="nav-btn" href="painel.html">📊 Faturamento</a>
+    <a class="nav-btn active" href="balanco.html">💰 Balanço mensal</a>
+  </nav>
+
+  <div class="header">
+    <h1>balanço <span>mensal</span></h1>
+    <div class="month-nav">
+      <button id="prev-m">‹</button>
+      <span class="month-label" id="month-label"></span>
+      <button id="next-m">›</button>
+    </div>
+  </div>
+
+  <div class="cards">
+    <div class="card inc"><div class="clabel">entradas</div><div class="cval" id="c-inc">R$ 0,00</div></div>
+    <div class="card exp"><div class="clabel">saídas variáveis</div><div class="cval" id="c-exp">R$ 0,00</div></div>
+    <div class="card fix"><div class="clabel">gastos fixos</div><div class="cval" id="c-fix">R$ 0,00</div></div>
+    <div class="card bal"><div class="clabel">saldo real</div><div class="cval" id="c-bal">R$ 0,00</div></div>
+  </div>
+
+  <div class="charts-row">
+    <div class="chart-box">
+      <div class="stitle">entradas vs saídas por semana</div>
+      <div class="chart-canvas-wrap"><canvas id="chart-weekly"></canvas></div>
+    </div>
+    <div class="chart-box">
+      <div class="stitle">saldo acumulado</div>
+      <div class="chart-canvas-wrap"><canvas id="chart-balance"></canvas></div>
+    </div>
+  </div>
+
+  <div class="fixed-panel">
+    <div class="fixed-panel-header">
+      <div class="stitle" style="margin-bottom:0;">📌 gastos fixos do mês</div>
+      <span class="ftotal" id="fixed-panel-total">R$ 0,00</span>
+    </div>
+    <div class="fixed-rows" id="fixed-rows-list"></div>
+  </div>
+
+  <div class="cat-section">
+    <div class="stitle" style="margin-bottom:1rem;">gastos por categoria</div>
+    <div class="cat-grid" id="cat-grid"><p class="no-data" style="grid-column:1/-1;font-family:-apple-system,sans-serif;">sem dados este mês</p></div>
+  </div>
+
+  <div class="daily-wrap">
+    <div class="stitle" style="margin-bottom:.75rem;">resumo diário</div>
+    <table>
+      <thead>
+        <tr>
+          <th>dia</th>
+          <th class="num">entradas</th>
+          <th class="num">variáveis</th>
+          <th class="num">fixos</th>
+          <th class="num">saldo do dia</th>
+          <th class="num">acumulado</th>
+        </tr>
+      </thead>
+      <tbody id="daily-tbody"></tbody>
+    </table>
+  </div>
+
+  <footer>dados lidos do mesmo localStorage do gerenciador de gastos diários</footer>
+</div>
+
+<script>
+  const MONTHS = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+  const CAT_ICONS = { Alimentação:'🍽', Transporte:'🚌', Saúde:'💊', Lazer:'🎮', Moradia:'🏠', Salário:'💼', Freelance:'💻', Assinatura:'📺', Outros:'📦' };
+
+  let now = new Date();
+  let year = now.getFullYear();
+  let month = now.getMonth();
+  let weeklyChart = null;
+  let balanceChart = null;
+
+  function fmtBRL(n) { return 'R$ ' + n.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2}); }
+  function pad(n){ return String(n).padStart(2,'0'); }
+
+  function loadData() { try { return JSON.parse(localStorage.getItem('gastos_data')||'{}'); } catch(e){ return {}; } }
+  function loadFixed() { try { return JSON.parse(localStorage.getItem('gastos_fixos')||'[]'); } catch(e){ return []; } }
+  function daysInMonth(y,m){ return new Date(y,m+1,0).getDate(); }
+
+  function render() {
+    document.getElementById('month-label').textContent = `${MONTHS[month]} ${year}`;
+    const allData = loadData();
+    const fixedExpenses = loadFixed();
+    const days = daysInMonth(year, month);
+
+    let totalInc = 0, totalExp = 0, totalFixed = 0;
+    let accumulated = 0;
+    const catTotals = {};
+    const weeklyInc = [0,0,0,0,0];
+    const weeklyExp = [0,0,0,0,0];
+    const balanceLine = [];
+    const tableRows = [];
+
+    const fixedByDay = {};
+    fixedExpenses.forEach(f => {
+      const d = f.day;
+      if (d >= 1 && d <= days) {
+        if (!fixedByDay[d]) fixedByDay[d] = [];
+        fixedByDay[d].push(f);
+      }
+    });
+    totalFixed = fixedExpenses.reduce((s,f) => f.day >= 1 && f.day <= days ? s+f.val : s, 0);
+
+    for (let d = 1; d <= days; d++) {
+      const key = `${year}-${pad(month+1)}-${pad(d)}`;
+      const entries = allData[key] || [];
+      const fixedToday = fixedByDay[d] || [];
+      let dayInc = 0, dayVar = 0, dayFix = 0;
+      entries.forEach(e => {
+        if (e.type === 'income') dayInc += e.val;
+        else { dayVar += e.val; catTotals[e.cat] = (catTotals[e.cat]||0)+e.val; }
+      });
+      fixedToday.forEach(f => { dayFix += f.val; catTotals[f.cat] = (catTotals[f.cat]||0)+f.val; });
+      const dayExp = dayVar + dayFix;
+      totalInc += dayInc;
+      totalExp += dayVar;
+      accumulated += dayInc - dayExp;
+      const wk = Math.min(Math.floor((d-1)/7),4);
+      weeklyInc[wk] += dayInc;
+      weeklyExp[wk] += dayExp;
+      balanceLine.push(parseFloat(accumulated.toFixed(2)));
+      if (entries.length > 0 || fixedToday.length > 0) {
+        tableRows.push({d, dayInc, dayVar, dayFix, bal: dayInc-dayExp, acc: accumulated});
+      }
+    }
+
+    document.getElementById('c-inc').textContent = fmtBRL(totalInc);
+    document.getElementById('c-exp').textContent = fmtBRL(totalExp);
+    document.getElementById('c-fix').textContent = fmtBRL(totalFixed);
+    const netBal = totalInc - totalExp - totalFixed;
+    const balEl = document.getElementById('c-bal');
+    balEl.textContent = fmtBRL(netBal);
+    balEl.style.color = netBal >= 0 ? 'var(--green)' : 'var(--red)';
+
+    document.getElementById('fixed-panel-total').textContent = fmtBRL(totalFixed);
+    const fixedRowsEl = document.getElementById('fixed-rows-list');
+    if (!fixedExpenses.length) {
+      fixedRowsEl.innerHTML = '<p class="no-fixed">nenhum gasto fixo cadastrado.</p>';
+    } else {
+      const sorted = fixedExpenses.slice().sort((a,b)=>a.day-b.day);
+      fixedRowsEl.innerHTML = sorted.map(f => `
+        <div class="fixed-row">
+          <span class="fixed-row-icon">${CAT_ICONS[f.cat]||'📦'}</span>
+          <span class="fixed-row-desc">${f.desc}</span>
+          <span class="fixed-row-day">dia ${f.day}</span>
+          <span class="fixed-row-val">−${fmtBRL(f.val)}</span>
+        </div>`).join('');
+    }
+
+    const isDark = matchMedia('(prefers-color-scheme: dark)').matches;
+    const gridColor = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
+    const labelColor = isDark ? '#a0a09a' : '#6b6a65';
+
+    if (weeklyChart) weeklyChart.destroy();
+    weeklyChart = new Chart(document.getElementById('chart-weekly'), {
+      type: 'bar',
+      data: {
+        labels: ['sem 1','sem 2','sem 3','sem 4','sem 5'],
+        datasets: [
+          { label: 'Entradas', data: weeklyInc.map(v=>parseFloat(v.toFixed(2))), backgroundColor: '#1D9E7599', borderRadius: 4 },
+          { label: 'Saídas', data: weeklyExp.map(v=>parseFloat(v.toFixed(2))), backgroundColor: '#D85A3099', borderRadius: 4 }
+        ]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { ticks: { color: labelColor, font: { size: 11 } }, grid: { color: gridColor } },
+          y: { ticks: { color: labelColor, font: { size: 11 }, callback: v => 'R$'+v.toFixed(0) }, grid: { color: gridColor } }
+        }
+      }
+    });
+
+    if (balanceChart) balanceChart.destroy();
+    const lineColor = netBal >= 0 ? '#1D9E75' : '#D85A30';
+    balanceChart = new Chart(document.getElementById('chart-balance'), {
+      type: 'line',
+      data: {
+        labels: Array.from({length: days}, (_,i) => i+1),
+        datasets: [{ data: balanceLine, borderColor: lineColor, backgroundColor: lineColor+'18', fill: true, tension: 0.35, pointRadius: 0, borderWidth: 2 }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { ticks: { color: labelColor, font: { size: 10 }, maxTicksLimit: 8 }, grid: { color: gridColor } },
+          y: { ticks: { color: labelColor, font: { size: 10 }, callback: v => 'R$'+v.toFixed(0) }, grid: { color: gridColor } }
+        }
+      }
+    });
+
+    const catGrid = document.getElementById('cat-grid');
+    const catSorted = Object.entries(catTotals).sort((a,b)=>b[1]-a[1]);
+    if (!catSorted.length) {
+      catGrid.innerHTML = '<p class="no-data" style="grid-column:1/-1;font-family:-apple-system,sans-serif;">sem saídas este mês</p>';
+    } else {
+      const maxCat = catSorted[0][1];
+      catGrid.innerHTML = catSorted.map(([cat,val]) => `
+        <div class="cat-row">
+          <span class="cat-icon">${CAT_ICONS[cat]||'📦'}</span>
+          <span class="cat-name">${cat}</span>
+          <div class="cat-bar-bg"><div class="cat-bar-fill" style="width:${Math.round(val/maxCat*100)}%"></div></div>
+          <span class="cat-val">${fmtBRL(val)}</span>
+        </div>`).join('');
+    }
+
+    const tbody = document.getElementById('daily-tbody');
+    if (!tableRows.length) {
+      tbody.innerHTML = `<tr><td colspan="6" class="no-data">sem transações registradas este mês</td></tr>`;
+    } else {
+      tbody.innerHTML = tableRows.map(r => `
+        <tr>
+          <td style="color:var(--text2)">${pad(r.d)}/${pad(month+1)}</td>
+          <td class="num" style="color:var(--green)">${r.dayInc > 0 ? fmtBRL(r.dayInc) : '—'}</td>
+          <td class="num" style="color:var(--red)">${r.dayVar > 0 ? fmtBRL(r.dayVar) : '—'}</td>
+          <td class="num" style="color:var(--amber)">${r.dayFix > 0 ? fmtBRL(r.dayFix) : '—'}</td>
+          <td class="num"><span class="badge ${r.bal>=0?'pos':'neg'}">${fmtBRL(r.bal)}</span></td>
+          <td class="num" style="color:${r.acc>=0?'var(--green)':'var(--red)'};font-weight:600">${fmtBRL(r.acc)}</td>
+        </tr>`).join('');
+    }
+  }
+
+  function shiftMonth(delta) {
+    month += delta;
+    if (month > 11) { month = 0; year++; }
+    if (month < 0) { month = 11; year--; }
+    render();
+  }
+
+  document.getElementById('prev-m').onclick = () => shiftMonth(-1);
+  document.getElementById('next-m').onclick = () => shiftMonth(1);
+  render();
+</script>
+</body>
+</html>
