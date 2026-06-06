@@ -20,7 +20,7 @@
 /* ── 1. Configuração ── */
 
 // ⚠️  Troque pela URL do seu backend depois de fazer o deploy
-var API_URL = 'http://localhost:3000';
+var API_URL = 'https://meu-site-production-86c0.up.railway.app';
 
 // Duração de cada atendimento em minutos
 var DURACAO_MIN = 60;
