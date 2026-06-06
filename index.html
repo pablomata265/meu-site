@@ -21,7 +21,7 @@
   </div>
 
   <!-- progress bar -->
-  <div class="progress" id="prog-dots">
+<div class="progress" id="prog-dots">
     <div class="p-dot active" id="dot1">1</div>
     <div class="p-line" id="line1"></div>
     <div class="p-dot idle" id="dot2">2</div>
@@ -29,12 +29,15 @@
     <div class="p-dot idle" id="dot3">3</div>
     <div class="p-line" id="line3"></div>
     <div class="p-dot idle" id="dot4">4</div>
+    <div class="p-line" id="line4"></div>
+    <div class="p-dot idle" id="dot5">5</div>
   </div>
   <div class="p-labels">
     <span class="p-label active" id="lbl1">Dados</span>
-    <span class="p-label" id="lbl2">Data</span>
-    <span class="p-label" id="lbl3">Horário</span>
-    <span class="p-label" id="lbl4">Confirmar</span>
+    <span class="p-label" id="lbl2">Serviço</span>
+    <span class="p-label" id="lbl3">Data</span>
+    <span class="p-label" id="lbl4">Horário</span>
+    <span class="p-label" id="lbl5">Confirmar</span>
   </div>
 
   <!-- card -->
@@ -71,9 +74,39 @@
         </button>
       </div>
     </div>
+    <!-- PAGE 2: serviços -->
+<div class="page" id="p2">
+  <h2 class="card-title">Escolha o serviço</h2>
+  <p class="card-sub">Selecione o serviço desejado</p>
+
+  <div class="servicos-grid">
+
+    <div class="servico-card" onclick="selecionarServico(this, 'Corte')">
+      <div class="servico-nome">Corte</div>
+      <div class="servico-preco">R$ 50,00</div>
+    </div>
+
+    <div class="servico-card" onclick="selecionarServico(this, 'Escova')">
+      <div class="servico-nome">Escova</div>
+      <div class="servico-preco">R$ 80,00</div>
+    </div>
+
+  </div>
+
+  <div class="btn-row">
+    <button class="btn-back" onclick="goPage(1,2)">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      Voltar
+    </button>
+    <button class="btn-primary" onclick="goStep3()">
+      Continuar
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+    </button>
+  </div>
+</div>
 
     <!-- PAGE 2: calendário -->
-    <div class="page" id="p2">
+    <div class="page" id="p3">
       <h2 class="card-title">Escolha a data</h2>
       <p class="card-sub">Selecione um dia disponível para o atendimento</p>
 
@@ -90,25 +123,6 @@
       <div class="cal-grid" id="cal-grid"></div>
 
       <div class="btn-row">
-        <button class="btn-back" onclick="goPage(1,2)">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-          Voltar
-        </button>
-        <button class="btn-primary" onclick="goStep3()">
-          Continuar
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-        </button>
-      </div>
-    </div>
-
-    <!-- PAGE 3: horários -->
-    <div class="page" id="p3">
-      <h2 class="card-title">Escolha o horário</h2>
-      <p class="card-sub" id="slot-date-label">Selecione um horário disponível</p>
-
-      <div class="slot-grid" id="slot-grid"></div>
-
-      <div class="btn-row">
         <button class="btn-back" onclick="goPage(2,3)">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
           Voltar
@@ -120,8 +134,27 @@
       </div>
     </div>
 
-    <!-- PAGE 4: confirmação -->
+    <!-- PAGE 3: horários -->
     <div class="page" id="p4">
+      <h2 class="card-title">Escolha o horário</h2>
+      <p class="card-sub" id="slot-date-label">Selecione um horário disponível</p>
+
+      <div class="slot-grid" id="slot-grid"></div>
+
+      <div class="btn-row">
+        <button class="btn-back" onclick="goPage(3,4)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+          Voltar
+        </button>
+        <button class="btn-primary" onclick="goStep5()">
+          Continuar
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- PAGE 4: confirmação -->
+    <div class="page" id="p5">
       <h2 class="card-title">Confirmar agendamento</h2>
       <p class="card-sub">Revise os dados antes de finalizar</p>
 
@@ -135,6 +168,10 @@
           <span class="sum-val" id="s-tel"></span>
         </div>
         <div class="sum-row">
+          <span class="sum-label">Serviço</span>
+          <span class="sum-val" id="s-servico"></span>
+        </div>
+        <div class="sum-row">
           <span class="sum-label">Data</span>
           <span class="sum-val" id="s-data"></span>
         </div>
@@ -145,7 +182,7 @@
       </div>
 
       <div class="btn-row">
-        <button class="btn-back" onclick="goPage(3,4)">
+        <button class="btn-back" onclick="goPage(4,5)">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
           Voltar
         </button>
@@ -157,7 +194,7 @@
     </div>
 
     <!-- PAGE 5: sucesso -->
-    <div class="page" id="p5">
+    <div class="page" id="p6">
       <div class="success-wrap">
         <div class="success-icon">
           <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>

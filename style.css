@@ -352,3 +352,75 @@ body::after {
 
 /* ── divisor ── */
 .divider { border: none; border-top: 1px solid var(--border); margin: 1.25rem 0; }
+
+/* ── serviços ── */
+.servicos-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 1rem;
+}
+
+.servico-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.2s;
+  background: #fff;
+}
+
+.servico-card:hover {
+  border-color: var(--accent);
+  background: var(--accent-light);
+}
+
+.servico-card.selecionado {
+  border-color: var(--accent);
+  background: var(--accent-light);
+}
+
+.servico-info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.servico-nome {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.servico-preco {
+  font-size: 13px;
+  color: var(--text-2);
+}
+
+.servico-radio {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  flex-shrink: 0;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.servico-card.selecionado .servico-radio {
+  border-color: var(--accent);
+  background: var(--accent);
+}
+
+.servico-card.selecionado .servico-radio::after {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #fff;
+}

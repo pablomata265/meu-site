@@ -27,7 +27,7 @@ var DURACAO_MIN = 60;
 
 
 /* ── 2. Estado global ── */
-var state = { nome: '', sobrenome: '', tel: '', data: null, hora: '' };
+var state = { nome: '', sobrenome: '', tel: '',servico: '', data: null, hora: '' };
 var calYear, calMonth;
 var selectedDay  = null;
 var selectedSlot = null;
@@ -44,11 +44,23 @@ var MONTHS = [
 var DAYS = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
 
 // Todos os horários que o prestador oferece
-var ALL_SLOTS = [
-  '08:00','08:30','09:00','09:30','10:00','10:30',
-  '11:00','11:30','13:00','13:30','14:00','14:30',
-  '15:00','15:30','16:00','16:30'
-];
+// Horários por dia da semana
+// 0=Domingo, 1=Segunda, 2=Terça, 3=Quarta, 4=Quinta, 5=Sexta, 6=Sábado
+var SLOTS_POR_DIA = {
+  0: [], // Domingo — fechado
+  1: ['09:00','09:30','10:00','10:30','11:00'], // Segunda
+  2: ['09:00','09:30','10:00','10:30','11:00','11:30','13:00','13:30','14:00','14:30','15:00','15:30'], // Terça
+  3: ['09:00','09:30','10:00','10:30','11:00','11:30','13:00','13:30','14:00','14:30','15:00','15:30'], // Quarta
+  4: ['09:00','09:30','10:00','10:30','11:00','11:30','13:00','13:30','14:00','14:30','15:00','15:30'], // Quinta
+  5: ['09:00','09:30','10:00','10:30','11:00','11:30','13:00','13:30','14:00','14:30','15:00','15:30'], // Sexta
+  6: ['09:00','09:30','10:00','10:30','11:00','11:30'], // Sábado
+};
+
+// Pega os slots do dia selecionado
+function getSlotsParaDia(date) {
+  var diaSemana = date.getDay();
+  return SLOTS_POR_DIA[diaSemana] || [];
+}
 
 // Horários ocupados — preenchido dinamicamente pela API
 var UNAVAIL = [];
@@ -65,8 +77,9 @@ function goPage(to, from) {
   updateProgress(to);
 }
 
-function updateProgress(step) {
-  for (var i = 1; i <= 4; i++) {
+  function updateProgress(step) {
+  if (step > 5) return;
+  for (var i = 1; i <= 5; i++) {
     var dot = document.getElementById('dot' + i);
     var lbl = document.getElementById('lbl' + i);
     if (i < step) {
@@ -81,9 +94,22 @@ function updateProgress(step) {
     }
     lbl.className = 'p-label' + (i < step ? ' done' : i === step ? ' active' : '');
   }
-  for (var j = 1; j <= 3; j++) {
+  for (var j = 1; j <= 4; j++) {
     document.getElementById('line' + j).className = 'p-line' + (j < step ? ' done' : '');
   }
+}
+function selecionarServico(el, nome) {
+  state.servico = nome;
+  document.querySelectorAll('.servico-card').forEach(function(e) {
+    e.classList.remove('selecionado');
+  });
+  el.classList.add('selecionado');
+}
+
+function goStep3() {
+  if (!state.servico) { alert('Por favor, selecione um serviço.'); return; }
+  goPage(3, 2);
+  renderCal();
 }
 
 
@@ -189,7 +215,7 @@ function selectDay(date, el) {
   el.classList.add('selected');
 }
 
-function goStep3() {
+function goStep4() {
   if (!selectedDay) { alert('Por favor, selecione uma data.'); return; }
 
   state.data = selectedDay;
@@ -199,7 +225,7 @@ function goStep3() {
 
   // Mostra os slots com loading enquanto busca na API
   buscarSlots(selectedDay);
-  goPage(3, 2);
+  goPage(4, 3);
 }
 
 
@@ -214,7 +240,7 @@ function formatarData(date) {
 }
 
 function buscarSlots(date) {
-  var grid = document.getElementById('slot-grid');
+  ALL_SLOTS = getSlotsParaDia(date);var grid = document.getElementById('slot-grid');
   grid.innerHTML = '<p style="font-size:13px;color:var(--text-3);padding:12px 0">Carregando horários...</p>';
 
   var dataStr = formatarData(date);
@@ -264,24 +290,24 @@ function selectSlot(s, el) {
   el.classList.add('selected');
 }
 
-function goStep4() {
+function goStep5() {
   if (!selectedSlot) { alert('Por favor, selecione um horário.'); return; }
 
   state.hora = selectedSlot;
 
   document.getElementById('s-nome').textContent = state.nome + ' ' + state.sobrenome;
   document.getElementById('s-tel').textContent  = state.tel;
-  document.getElementById('s-data').textContent =
-    state.data.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  document.getElementById('s-data').textContent =state.data.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  document.getElementById('s-servico').textContent = state.servico;
   document.getElementById('s-hora').textContent = state.hora + 'h';
 
-  goPage(4, 3);
+  goPage(5, 4);
 }
 
 
 /* ── 8. Etapa 5 — finalizar (salva evento no Google Calendar) ── */
 function finalizar() {
-  var btnConfirmar = document.querySelector('#p4 .btn-primary');
+  var btnConfirmar = document.querySelector('#p5 .btn-primary');
   btnConfirmar.disabled    = true;
   btnConfirmar.textContent = 'Salvando...';
 
@@ -318,19 +344,18 @@ function mostrarSucesso() {
     dataStr.charAt(0).toUpperCase() + dataStr.slice(1) + ' às ' + state.hora + 'h<br>' +
     'Confirmação enviada para ' + state.tel;
 
-  for (var i = 1; i <= 4; i++) {
+  for (var i = 1; i <= 5; i++) {
     var dot = document.getElementById('dot' + i);
     dot.className = 'p-dot done';
     dot.innerHTML = '<svg class="check-svg" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>';
     document.getElementById('lbl' + i).className = 'p-label done';
   }
-  for (var j = 1; j <= 3; j++) {
+  for (var j = 1; j <= 4; j++) {
     document.getElementById('line' + j).className = 'p-line done';
   }
 
-  goPage(5, 4);
+  goPage(6, 5);
 }
-
 
 /* ── 9. Reset do formulário ── */
 function resetForm() {
@@ -347,7 +372,7 @@ function resetForm() {
   calYear  = now.getFullYear();
   calMonth = now.getMonth();
 
-  document.getElementById('p5').classList.remove('active');
+  document.getElementById('p6').classList.remove('active');
   document.getElementById('p1').classList.add('active');
   updateProgress(1);
 }
