@@ -21,7 +21,7 @@
   </div>
 
   <!-- progress bar -->
-<div class="progress" id="prog-dots">
+  <div class="progress" id="prog-dots">
     <div class="p-dot active" id="dot1">1</div>
     <div class="p-line" id="line1"></div>
     <div class="p-dot idle" id="dot2">2</div>
@@ -74,48 +74,184 @@
         </button>
       </div>
     </div>
+
     <!-- PAGE 2: serviços -->
-<div class="page" id="p2">
-  <h2 class="card-title">Escolha o serviço</h2>
-  <p class="card-sub">Selecione o serviço desejado</p>
+    <div class="page" id="p2">
+      <h2 class="card-title">Escolha o serviço</h2>
+      <p class="card-sub">Selecione um ou mais serviços desejados</p>
 
-  <div class="servicos-grid">
+      <div class="servicos-grid">
 
-    <div class="servico-card" onclick="selecionarServico(this, 'Corte')">
-      <div class="servico-nome">Corte</div>
-    </div>
+  <!-- 💇 Cabelo -->
+  <div class="categoria-titulo">💇 Cabelo</div>
 
-    <div class="servico-card" onclick="selecionarServico(this, 'Escova')">
-      <div class="servico-nome">Escova</div>
+  <div class="servico-card" onclick="selecionarServico(this, 'Progressiva')">
+    <div class="servico-info">
+      <div class="servico-nome">Progressiva</div>
     </div>
-    
-    <div class="servico-card" onclick="selecionarServico(this, 'Cilios')">
-      <div class="servico-nome">Cilios</div>
+    <div class="servico-radio"></div>
+  </div>
+  <div class="servico-card" onclick="selecionarServico(this, 'Botox')">
+    <div class="servico-info">
+      <div class="servico-nome">Botox</div>
     </div>
-    
-    <div class="servico-card" onclick="selecionarServico(this, 'Sobrancelha')">
-      <div class="servico-nome">Sobrancelha</div>
+    <div class="servico-radio"></div>
+  </div>
+  <div class="servico-card" onclick="selecionarServico(this, 'Cronograma')">
+    <div class="servico-info">
+      <div class="servico-nome">Cronograma</div>
     </div>
-    
-    <div class="servico-card" onclick="selecionarServico(this, 'Pintura')">
-      <div class="servico-nome">Pintura</div>
+    <div class="servico-radio"></div>
+  </div>
+  <div class="servico-card" onclick="selecionarServico(this, 'Hidratação')">
+    <div class="servico-info">
+      <div class="servico-nome">Hidratação</div>
     </div>
-    
+    <div class="servico-radio"></div>
+  </div>
+  <div class="servico-card" onclick="selecionarServico(this, 'Tintura')">
+    <div class="servico-info">
+      <div class="servico-nome">Tintura</div>
+    </div>
+    <div class="servico-radio"></div>
+  </div>
+  <div class="servico-card" onclick="selecionarServico(this, 'Cristalização')">
+    <div class="servico-info">
+      <div class="servico-nome">Cristalização</div>
+    </div>
+    <div class="servico-radio"></div>
   </div>
 
-  <div class="btn-row">
-    <button class="btn-back" onclick="goPage(1,2)">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-      Voltar
-    </button>
-    <button class="btn-primary" onclick="goStep3()">
-      Continuar
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-    </button>
+  <div class="servico-card" onclick="selecionarServico(this, 'Botox')">
+    <div class="servico-info">
+      <div class="servico-nome">Botox</div>
+    </div>
+    <div class="servico-radio"></div>
   </div>
-</div>
+  <div class="servico-card" onclick="selecionarServico(this, 'Colocação de Mega-Hair')">
+    <div class="servico-info">
+      <div class="servico-nome">Colocação de Mega-Hair</div>
+    </div>
+    <div class="servico-radio"></div>
+  </div>
+  <div class="servico-card" onclick="selecionarServico(this, 'Manutenção de Mega-Hair')">
+    <div class="servico-info">
+      <div class="servico-nome">Manutenção de Mega-Hair</div>
+    </div>
+    <div class="servico-radio"></div>
+  </div>
 
-    <!-- PAGE 2: calendário -->
+  <!-- 💅 Unhas -->
+  <div class="categoria-titulo">💅 Unhas</div>
+
+  <div class="servico-card" onclick="selecionarServico(this, 'Pé')">
+    <div class="servico-info">
+      <div class="servico-nome">Pé</div>
+    </div>
+    <div class="servico-radio"></div>
+  </div>
+  <div class="servico-card" onclick="selecionarServico(this, 'Mãos')">
+    <div class="servico-info">
+      <div class="servico-nome">Mãos</div>
+    </div>
+    <div class="servico-radio"></div>
+  </div>
+  <div class="servico-card" onclick="selecionarServico(this, 'Pé e Mão')">
+    <div class="servico-info">
+      <div class="servico-nome">Pé e Mão</div>
+    </div>
+    <div class="servico-radio"></div>
+  </div>
+  <div class="servico-card" onclick="selecionarServico(this, 'Unha em Gel')">
+    <div class="servico-info">
+      <div class="servico-nome">Unha em Gel</div>
+    </div>
+    <div class="servico-radio"></div>
+  </div>
+  <div class="servico-card" onclick="selecionarServico(this, 'Manutenção de unha em gel')">
+    <div class="servico-info">
+      <div class="servico-nome">Manutenção de unha em gel</div>
+    </div>
+    <div class="servico-radio"></div>
+  </div>
+  <div class="servico-card" onclick="selecionarServico(this, 'Esmaltação em gel')">
+    <div class="servico-info">
+      <div class="servico-nome">Esmaltação em gel</div>
+    </div>
+    <div class="servico-radio"></div>
+  </div>
+  <div class="servico-card" onclick="selecionarServico(this, 'Banho de gel')">
+    <div class="servico-info">
+      <div class="servico-nome">Banho de gel</div>
+    </div>
+    <div class="servico-radio"></div>
+  </div>
+  <div class="servico-card" onclick="selecionarServico(this, 'Postiça Realista')">
+    <div class="servico-info">
+      <div class="servico-nome">Postiça Realista</div>
+    </div>
+    <div class="servico-radio"></div>
+  </div>
+  <div class="servico-card" onclick="selecionarServico(this, 'Blindagem')">
+    <div class="servico-info">
+      <div class="servico-nome">Blindagem</div>
+    </div>
+    <div class="servico-radio"></div>
+  </div>
+  <div class="servico-card" onclick="selecionarServico(this, 'Spa dos Pés')">
+    <div class="servico-info">
+      <div class="servico-nome">Spa dos Pés</div>
+    </div>
+    <div class="servico-radio"></div>
+  </div>
+
+  <!-- 👁️ Cílios -->
+  <div class="categoria-titulo">👁️ Cílios</div>
+
+  <div class="servico-card" onclick="selecionarServico(this, 'Extensão de Cílios')">
+    <div class="servico-info">
+      <div class="servico-nome">Extensão de Cílios</div>
+    </div>
+    <div class="servico-radio"></div>
+  </div>
+  <div class="servico-card" onclick="selecionarServico(this, 'Manutenções')">
+    <div class="servico-info">
+      <div class="servico-nome">Manutenções</div>
+    </div>
+    <div class="servico-radio"></div>
+  </div>
+
+  <!-- 🤨 Sobrancelha -->
+  <div class="categoria-titulo">🤨 Sobrancelha</div>
+
+  <div class="servico-card" onclick="selecionarServico(this, 'Design Simples')">
+    <div class="servico-info">
+      <div class="servico-nome">Design Simples</div>
+    </div>
+    <div class="servico-radio"></div>
+  </div>
+  <div class="servico-card" onclick="selecionarServico(this, 'Design c/ Henna')">
+    <div class="servico-info">
+      <div class="servico-nome">Design c/ Henna</div>
+    </div>
+    <div class="servico-radio"></div>
+  </div>
+
+</div><!-- /servicos-grid -->
+
+      <div class="btn-row">
+        <button class="btn-back" onclick="goPage(1,2)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+          Voltar
+        </button>
+        <button class="btn-primary" onclick="goStep3()">
+          Continuar
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </button>
+      </div>
+    </div><!-- /page p2 -->
+
+    <!-- PAGE 3: calendário -->
     <div class="page" id="p3">
       <h2 class="card-title">Escolha a data</h2>
       <p class="card-sub">Selecione um dia disponível para o atendimento</p>
@@ -144,7 +280,7 @@
       </div>
     </div>
 
-    <!-- PAGE 3: horários -->
+    <!-- PAGE 4: horários -->
     <div class="page" id="p4">
       <h2 class="card-title">Escolha o horário</h2>
       <p class="card-sub" id="slot-date-label">Selecione um horário disponível</p>
@@ -163,7 +299,7 @@
       </div>
     </div>
 
-    <!-- PAGE 4: confirmação -->
+    <!-- PAGE 5: confirmação -->
     <div class="page" id="p5">
       <h2 class="card-title">Confirmar agendamento</h2>
       <p class="card-sub">Revise os dados antes de finalizar</p>
@@ -203,18 +339,20 @@
       </div>
     </div>
 
-    <!-- PAGE 5: sucesso -->
+    <!-- PAGE 6: sucesso -->
     <div class="page" id="p6">
       <div class="success-wrap">
         <div class="success-icon">
           <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
         </div>
         <h2>Tudo certo!</h2>
-          <p>Seu agendamento foi confirmado com sucesso.</p>
-          <div class="success-detail" id="success-detail"></div>
-          <a id="btn-whatsapp" href="#" target="_blank" class="btn-primary" style="width:100%;justify-content:center;text-decoration:none;margin-bottom:10px;">📲 Confirmar pelo WhatsApp</a>
-<button class="btn-primary" style="width:100%;justify-content:center" onclick="resetForm()">
-  Fazer novo agendamento</button>
+        <p>Seu agendamento foi confirmado com sucesso.</p>
+        <div class="success-detail" id="success-detail"></div>
+        <a id="btn-whatsapp" href="#" target="_blank" class="btn-primary" style="width:100%;justify-content:center;text-decoration:none;margin-bottom:10px;">
+          📲 Confirmar pelo WhatsApp
+        </a>
+        <button class="btn-primary" style="width:100%;justify-content:center" onclick="resetForm()">
+          Fazer novo agendamento
         </button>
       </div>
     </div>

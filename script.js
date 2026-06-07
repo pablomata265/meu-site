@@ -1,70 +1,42 @@
 /* ============================================================
    script.js — formulário de agendamento + Google Calendar
-   ============================================================
-
-   ESTRUTURA:
-   1. Configuração
-   2. Estado global
-   3. Constantes (meses, dias, slots)
-   4. Navegação entre páginas
-   5. Etapa 1 — dados pessoais + validação
-   6. Etapa 2 — calendário
-   7. Etapa 3 — horários (busca horários ocupados na API)
-   8. Etapa 4 — confirmação
-   9. Etapa 5 — finalizar (salva no Google Calendar)
-   10. Reset do formulário
-   11. Inicialização
    ============================================================ */
 
-
 /* ── 1. Configuração ── */
-
-// ⚠️  Troque pela URL do seu backend depois de fazer o deploy
 var API_URL = 'https://meu-site-production-86c0.up.railway.app';
-
-// Duração de cada atendimento em minutos
 var DURACAO_MIN = 60;
 
-
 /* ── 2. Estado global ── */
-var state = { nome: '', sobrenome: '', tel: '',servico: '', data: null, hora: '' };
+var state = { nome: '', sobrenome: '', tel: '', servico: '', data: null, hora: '' };
 var calYear, calMonth;
 var selectedDay  = null;
 var selectedSlot = null;
+var servicosSelecionados = [];
 var now = new Date();
 calYear  = now.getFullYear();
 calMonth = now.getMonth();
 
-
 /* ── 3. Constantes ── */
-var MONTHS = [
-  'Janeiro','Fevereiro','Março','Abril','Maio','Junho',
-  'Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'
-];
+var MONTHS = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho',
+              'Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 var DAYS = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
 
-// Todos os horários que o prestador oferece
-// Horários por dia da semana
-// 0=Domingo, 1=Segunda, 2=Terça, 3=Quarta, 4=Quinta, 5=Sexta, 6=Sábado
 var SLOTS_POR_DIA = {
   0: [], // Domingo — fechado
-  1: [], // Segunda - fechado
+  1: [], // Segunda — fechado
   2: ['07:00','08:00','09:00','10:00','11:00','13:00','14:00'], // Terça
-  3: ['07:00','08:00','09:00','10:00','11:00','13:00','14:00','15:00', '16:00', '17:00'], // Quarta
+  3: ['07:00','08:00','09:00','10:00','11:00','13:00','14:00','15:00','16:00','17:00'], // Quarta
   4: ['07:00','08:00','09:00','10:00','11:00','13:00','14:00'], // Quinta
-  5: ['07:00','08:00','09:00','10:00','11:00','13:00','14:00','15:00', '16:00', '17:00'], // Sexta
-  6: ['07:00','08:00','09:00','10:00','11:00','13:00','14:00','15:00', '16:00', '17:00'], // Sábado
+  5: ['07:00','08:00','09:00','10:00','11:00','13:00','14:00','15:00','16:00','17:00'], // Sexta
+  6: ['07:00','08:00','09:00','10:00','11:00','13:00','14:00','15:00','16:00','17:00'], // Sábado
 };
 
-// Pega os slots do dia selecionado
 function getSlotsParaDia(date) {
   var diaSemana = date.getDay();
   return SLOTS_POR_DIA[diaSemana] || [];
 }
 
-// Horários ocupados — preenchido dinamicamente pela API
 var UNAVAIL = [];
-
 
 /* ── 4. Navegação entre páginas ── */
 function goPage(to, from) {
@@ -72,12 +44,12 @@ function goPage(to, from) {
   var next = document.getElementById('p' + to);
   next.classList.add('active');
   next.style.animation = 'none';
-  next.offsetHeight; // força reflow para re-acionar animação
+  next.offsetHeight;
   next.style.animation = '';
   updateProgress(to);
 }
 
-  function updateProgress(step) {
+function updateProgress(step) {
   if (step > 5) return;
   for (var i = 1; i <= 5; i++) {
     var dot = document.getElementById('dot' + i);
@@ -98,22 +70,26 @@ function goPage(to, from) {
     document.getElementById('line' + j).className = 'p-line' + (j < step ? ' done' : '');
   }
 }
+
+/* ── 5. Serviços ── */
 function selecionarServico(el, nome) {
-  state.servico = nome;
-  document.querySelectorAll('.servico-card').forEach(function(e) {
-    e.classList.remove('selecionado');
-  });
-  el.classList.add('selecionado');
+  if (el.classList.contains('selecionado')) {
+    el.classList.remove('selecionado');
+    servicosSelecionados = servicosSelecionados.filter(function(s) { return s !== nome; });
+  } else {
+    el.classList.add('selecionado');
+    servicosSelecionados.push(nome);
+  }
+  state.servico = servicosSelecionados.join(', ');
 }
 
 function goStep3() {
-  if (!state.servico) { alert('Por favor, selecione um serviço.'); return; }
+  if (servicosSelecionados.length === 0) { alert('Por favor, selecione ao menos um serviço.'); return; }
   goPage(3, 2);
   renderCal();
 }
 
-
-/* ── 5. Etapa 1 — dados pessoais + validação ── */
+/* ── 6. Etapa 1 — dados pessoais + validação ── */
 function goStep2() {
   var nome     = document.getElementById('nome').value.trim();
   var sobre    = document.getElementById('sobrenome').value.trim();
@@ -132,10 +108,8 @@ function goStep2() {
   state.tel       = tel;
 
   goPage(2, 1);
-  renderCal();
 }
 
-// Máscara de telefone brasileiro
 document.getElementById('tel').addEventListener('input', function (e) {
   var v = e.target.value.replace(/\D/g, '').slice(0, 11);
   if (v.length <= 10) {
@@ -146,15 +120,13 @@ document.getElementById('tel').addEventListener('input', function (e) {
   e.target.value = v;
 });
 
-// Limpa erro ao digitar
 ['nome', 'sobrenome', 'tel'].forEach(function (id) {
   document.getElementById(id).addEventListener('input', function () {
     document.getElementById('f-' + id).classList.remove('has-err');
   });
 });
 
-
-/* ── 6. Etapa 2 — calendário ── */
+/* ── 7. Calendário ── */
 function changeMonth(d) {
   calMonth += d;
   if (calMonth > 11) { calMonth = 0; calYear++; }
@@ -223,15 +195,11 @@ function goStep4() {
   document.getElementById('slot-date-label').textContent =
     label.charAt(0).toUpperCase() + label.slice(1);
 
-  // Mostra os slots com loading enquanto busca na API
   buscarSlots(selectedDay);
   goPage(4, 3);
 }
 
-
-/* ── 7. Etapa 3 — horários (busca ocupados no Google Calendar) ── */
-
-// Formata Date para "YYYY-MM-DD" sem conversão de fuso
+/* ── 8. Horários ── */
 function formatarData(date) {
   var y = date.getFullYear();
   var m = String(date.getMonth() + 1).padStart(2, '0');
@@ -240,7 +208,8 @@ function formatarData(date) {
 }
 
 function buscarSlots(date) {
-  ALL_SLOTS = getSlotsParaDia(date);var grid = document.getElementById('slot-grid');
+  ALL_SLOTS = getSlotsParaDia(date);
+  var grid = document.getElementById('slot-grid');
   grid.innerHTML = '<p style="font-size:13px;color:var(--text-3);padding:12px 0">Carregando horários...</p>';
 
   var dataStr = formatarData(date);
@@ -256,12 +225,8 @@ function buscarSlots(date) {
     })
     .catch(function (err) {
       console.error(err);
-      // Se a API falhar, mostra todos os slots disponíveis como fallback
       UNAVAIL = [];
       renderSlots();
-      grid.insertAdjacentHTML('afterbegin',
-        '<p style="font-size:12px;color:var(--danger);margin-bottom:8px">⚠️ Não foi possível verificar disponibilidade em tempo real.</p>'
-      );
     });
 }
 
@@ -295,17 +260,16 @@ function goStep5() {
 
   state.hora = selectedSlot;
 
-  document.getElementById('s-nome').textContent = state.nome + ' ' + state.sobrenome;
-  document.getElementById('s-tel').textContent  = state.tel;
-  document.getElementById('s-data').textContent =state.data.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  document.getElementById('s-nome').textContent    = state.nome + ' ' + state.sobrenome;
+  document.getElementById('s-tel').textContent     = state.tel;
   document.getElementById('s-servico').textContent = state.servico;
-  document.getElementById('s-hora').textContent = state.hora + 'h';
+  document.getElementById('s-data').textContent    = state.data.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  document.getElementById('s-hora').textContent    = state.hora + 'h';
 
   goPage(5, 4);
 }
 
-
-/* ── 8. Etapa 5 — finalizar (salva evento no Google Calendar) ── */
+/* ── 9. Finalizar ── */
 function finalizar() {
   var btnConfirmar = document.querySelector('#p5 .btn-primary');
   btnConfirmar.disabled    = true;
@@ -317,8 +281,8 @@ function finalizar() {
     body: JSON.stringify({
       nome:     state.nome + ' ' + state.sobrenome,
       telefone: state.tel,
-      data:     formatarData(state.data),   // "YYYY-MM-DD"
-      horario:  state.hora                  // "HH:MM"
+      data:     formatarData(state.data),
+      horario:  state.hora
     })
   })
   .then(function (r) {
@@ -343,14 +307,15 @@ function mostrarSucesso() {
     '<strong>' + state.nome + ' ' + state.sobrenome + '</strong><br>' +
     dataStr.charAt(0).toUpperCase() + dataStr.slice(1) + ' às ' + state.hora + 'h<br>' +
     'Confirmação enviada para ' + state.tel;
-    var telefoneDebora = '5521989347238';
-    var mensagem = 'Olá Debora! Acabei de fazer um agendamento pelo site:%0A%0A' +
-  '👤 Nome: ' + state.nome + ' ' + state.sobrenome + '%0A' +
-  '✂️ Serviço: ' + state.servico + '%0A' +
-  '📅 Data: ' + dataStr + '%0A' +
-  '🕐 Horário: ' + state.hora + 'h%0A%0A' +
-  'Aguardo confirmação!';
-document.getElementById('btn-whatsapp').href = 'https://wa.me/' + telefoneDebora + '?text=' + mensagem;
+
+  var telefoneDebora = '5521989347238';
+  var mensagem = 'Olá Debora! Acabei de fazer um agendamento pelo site:%0A%0A' +
+    '👤 Nome: ' + state.nome + ' ' + state.sobrenome + '%0A' +
+    '✂️ Serviço: ' + state.servico + '%0A' +
+    '📅 Data: ' + dataStr + '%0A' +
+    '🕐 Horário: ' + state.hora + 'h%0A%0A' +
+    'Aguardo confirmação!';
+  document.getElementById('btn-whatsapp').href = 'https://wa.me/' + telefoneDebora + '?text=' + mensagem;
 
   for (var i = 1; i <= 5; i++) {
     var dot = document.getElementById('dot' + i);
@@ -365,16 +330,21 @@ document.getElementById('btn-whatsapp').href = 'https://wa.me/' + telefoneDebora
   goPage(6, 5);
 }
 
-/* ── 9. Reset do formulário ── */
+/* ── 10. Reset ── */
 function resetForm() {
-  state        = { nome: '', sobrenome: '', tel: '', data: null, hora: '' };
-  selectedDay  = null;
-  selectedSlot = null;
-  UNAVAIL      = [];
+  state                = { nome: '', sobrenome: '', tel: '', servico: '', data: null, hora: '' };
+  selectedDay          = null;
+  selectedSlot         = null;
+  servicosSelecionados = [];
+  UNAVAIL              = [];
 
   ['nome', 'sobrenome', 'tel'].forEach(function (id) {
     document.getElementById(id).value = '';
     document.getElementById('f-' + id).classList.remove('has-err');
+  });
+
+  document.querySelectorAll('.servico-card').forEach(function(e) {
+    e.classList.remove('selecionado');
   });
 
   calYear  = now.getFullYear();
@@ -385,6 +355,5 @@ function resetForm() {
   updateProgress(1);
 }
 
-
-/* ── 10. Inicialização ── */
+/* ── 11. Inicialização ── */
 updateProgress(1);
