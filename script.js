@@ -343,6 +343,14 @@ function mostrarSucesso() {
     '<strong>' + state.nome + ' ' + state.sobrenome + '</strong><br>' +
     dataStr.charAt(0).toUpperCase() + dataStr.slice(1) + ' às ' + state.hora + 'h<br>' +
     'Confirmação enviada para ' + state.tel;
+    var telefoneDebora = '5521989959552';
+    var mensagem = 'Olá Debora! Acabei de fazer um agendamento pelo site:%0A%0A' +
+  '👤 Nome: ' + state.nome + ' ' + state.sobrenome + '%0A' +
+  '✂️ Serviço: ' + state.servico + '%0A' +
+  '📅 Data: ' + dataStr + '%0A' +
+  '🕐 Horário: ' + state.hora + 'h%0A%0A' +
+  'Aguardo confirmação!';
+document.getElementById('btn-whatsapp').href = 'https://wa.me/' + telefoneDebora + '?text=' + mensagem;
 
   for (var i = 1; i <= 5; i++) {
     var dot = document.getElementById('dot' + i);
